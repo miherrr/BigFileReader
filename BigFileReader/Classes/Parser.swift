@@ -19,19 +19,14 @@ class Parser {
     private init() {
         operations = OperationQueue()
         operations.qualityOfService = QualityOfService.background
-        operations.maxConcurrentOperationCount = 1
+        operations.maxConcurrentOperationCount = 2
     }
     
     func parseNextChunk(_ string: String, result: @escaping (([String]) -> Void)) {
-//        DispatchQueue.global().async { [unowned self] in
-//            var stringToParse = string
-//            if let localBuffer = self.buffer {
-//                self.buffer = nil
-//                stringToParse = localBuffer + stringToParse
-//            }
+        DispatchQueue.global().async { [unowned self] in
             let op = ParseOperation(string, mask: self.mask, closure: result)
             self.operations.addOperation(op)
-//        }
+        }
     }
     
     
@@ -52,6 +47,7 @@ class ParseOperation: Operation {
     }
 
     override func main() {
+        print("start parsing")
         let lines = string.split(separator: "\n").map { String($0) }
         
         guard let regular = try? NSRegularExpression(pattern: mask, options: []) else {
