@@ -17,7 +17,7 @@ class InitialViewController: UIViewController {
         super.viewDidLoad()
         
         maskTextField.text = ".*"
-        urlTextField.text = "https://joker-prognoz.ru/test.txt"
+        urlTextField.text = "https://joker-prognoz.ru/test2.txt"
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

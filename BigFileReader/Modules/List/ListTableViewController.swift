@@ -50,6 +50,47 @@ class ListTableViewController: UITableViewController {
         
         return cell
     }
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if rowsLeftToEnd(for: indexPath) <= 20 {
+            pageNumber += 1
+            DispatchQueue.main.async { [weak self] in
+                self?.insertNewRows()
+            }
+        }
+    }
+    
+    private func rowsLeftToEnd(for indexPath: IndexPath) -> Int {
+        var rowsCount = 0
+        for section in indexPath.section..<tableView.numberOfSections {
+            if section == indexPath.section {
+                rowsCount += tableView.numberOfRows(inSection: section) - (indexPath.row + 1)
+            } else {
+                rowsCount += tableView.numberOfRows(inSection: section)
+            }
+        }
+        
+        return rowsCount
+    }
+    
+    private func insertNewRows() {
+        let currentRowsCount = tableView.numberOfRows(inSection: 0)
+        let newRowsCount = dataSource.count
+        
+        let newIndexPaths = (currentRowsCount..<newRowsCount).map { IndexPath(row: $0, section: 0) }
+        
+        if #available(iOS 11.0, *) {
+            self.tableView.performBatchUpdates({
+                self.tableView.insertRows(at: newIndexPaths, with: .automatic)
+            }, completion: nil)
+        } else {
+            self.tableView.beginUpdates()
+            
+            self.tableView.insertRows(at: newIndexPaths, with: .automatic)
+            
+            self.tableView.endUpdates()
+        }
+    }
 }
 
 // MARK: - NSURLConnectionDataDelegate
@@ -70,7 +111,6 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
             self.data.append(results)
 
             DispatchQueue.main.async {
-//                guard let `self` = self else { return }
                 
                 if self.tableView.numberOfRows(inSection: 0) == 0 && !self.data.isEmpty {
                     self.pageNumber = 1
