@@ -56,6 +56,7 @@ class ParseOperation: Operation {
     }
 
     override func main() {
+        let start = CFAbsoluteTimeGetCurrent()
         let pattern = "(\(mask))\n"
         
         guard let regular = try? NSRegularExpression(pattern: pattern, options: []) else {
@@ -69,6 +70,9 @@ class ParseOperation: Operation {
             }
             return String(string[range])
         }
+        // run your work
+        let diff = CFAbsoluteTimeGetCurrent() - start
+        print("Took \(diff) seconds")
         closure(results)
     }
 }
