@@ -271,6 +271,17 @@ public extension WriteLockableSynchronizedArray {
             handleWriteOperation(op)
         }
     }
+    
+    subscript (subRange: ClosedRange<Int>) -> ArraySlice<Element> {
+        if subRange.upperBound == 0 { return [] }
+        var result: ArraySlice<Element> = ArraySlice()
+        
+        queue.sync {
+            result = self.internalArray[subRange]
+        }
+        
+        return result
+    }
 }
 
 

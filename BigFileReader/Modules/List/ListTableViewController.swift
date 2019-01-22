@@ -13,17 +13,27 @@ class ListTableViewController: UITableViewController {
     // MARK: - Public props
     var url: URL!
     var mask: String!
+    private let pageSize = 100
+    private var pageNumber = 0
     
     // MARK: - Private props
     private var chunkCounter: Int = 0
-    private var dataSource = WriteLockableSynchronizedArray<String>(with: [])
+    private var data = WriteLockableSynchronizedArray<String>(with: [])
+    private var dataSource: [String] {
+        return Array(data[0...(pageSize * pageNumber)])
+    }
+    private var updateQueue: OperationQueue!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        updateQueue = OperationQueue.main
+        updateQueue.maxConcurrentOperationCount = 1
+        
         Parser.shared.mask = mask
-        let connection = NSURLConnection(request: URLRequest(url: url), delegate: self, startImmediately: false)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 5000)
+        let connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
         connection?.start()
     }
 
@@ -44,6 +54,10 @@ class ListTableViewController: UITableViewController {
 
 // MARK: - NSURLConnectionDataDelegate
 extension ListTableViewController: NSURLConnectionDataDelegate {
+    func connectionDidFinishLoading(_ connection: NSURLConnection) {
+        print("finished")
+    }
+    
     func connection(_ connection: NSURLConnection, didReceive data: Data) {
         guard let chunk = String(data: data, encoding: String.Encoding.ascii) else {
             print("failed")
@@ -51,31 +65,30 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
         }
         print("chunk \(chunk.count)")
         
-        Parser.shared.parseNextChunk(chunk) { [weak self] results in
-            DispatchQueue.main.async { [weak self] in
-                guard let `self` = self else { return }
+        Parser.shared.parseNextChunk(chunk) { results in
 
-                let lastIndex = self.dataSource.count
-                
-                let indexPaths = (0..<results.count).map { IndexPath(row: lastIndex + $0, section: 0) }
-                
-                self.dataSource.append(results)
+            self.data.append(results)
+
+            DispatchQueue.main.async {
 //                guard let `self` = self else { return }
-                if #available(iOS 11.0, *) {
-                    self.tableView.performBatchUpdates({
+                
+                if self.tableView.numberOfRows(inSection: 0) == 0 && !self.data.isEmpty {
+                    self.pageNumber = 1
+                    let indexPaths = (0...self.dataSource.count - 1).map { IndexPath(row: $0, section: 0) }
+                    
+                    if #available(iOS 11.0, *) {
+                        self.tableView.performBatchUpdates({
+                            self.tableView.insertRows(at: indexPaths, with: .automatic)
+                        }, completion: nil)
+                    } else {
+                        self.tableView.beginUpdates()
+                        
                         self.tableView.insertRows(at: indexPaths, with: .automatic)
-                    }, completion: nil)
-                } else {
-                    // Fallback on earlier versions
+                        
+                        self.tableView.endUpdates()
+                    }
                 }
-//                self.tableView.beginUpdates()
-//
-//
-//                self.tableView.endUpdates()
             }
         }
-//        chunkCounter += 1
-//        print("==== Chunk #\(chunkCounter) ====\n")
-//        print(chunk)
     }
 }
