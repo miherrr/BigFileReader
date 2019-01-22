@@ -62,13 +62,12 @@ class ParseOperation: Operation {
             return
         }
         
-        var results: [String] = []
         let matches = regular.matches(in: string, options: [], range: NSRange(location: 0, length: string.count))
-        for match in matches {
+        let results = matches.compactMap { match -> String? in
             guard let range = Range(match.range, in: string) else {
-                continue
+                return nil
             }
-            results.append(String(string[range]))
+            return String(string[range])
         }
         closure(results)
     }
