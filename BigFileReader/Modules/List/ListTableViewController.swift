@@ -101,7 +101,6 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
     
     func connection(_ connection: NSURLConnection, didReceive data: Data) {
         guard let chunk = String(data: data, encoding: String.Encoding.ascii) else {
-            print("failed")
             return
         }
         print("chunk \(chunk.count)")

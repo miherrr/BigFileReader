@@ -19,12 +19,21 @@ class Parser {
     private init() {
         operations = OperationQueue()
         operations.qualityOfService = QualityOfService.background
-        operations.maxConcurrentOperationCount = 2
+        operations.maxConcurrentOperationCount = 1
     }
     
     func parseNextChunk(_ string: String, result: @escaping (([String]) -> Void)) {
         DispatchQueue.global().async { [unowned self] in
-            let op = ParseOperation(string, mask: self.mask, closure: result)
+            // найдем хвост чанка, который добавим в буффер для последующи парсингов
+            guard let tailStartIndex = string.lastIndex(of: "\n") else {
+                return
+            }
+            let tail = string[string.index(after: tailStartIndex)...]
+            
+            let stringToParse = "\(self.buffer ?? "")\(string)"
+            self.buffer = String(tail)
+
+            let op = ParseOperation(stringToParse, mask: self.mask, closure: result)
             self.operations.addOperation(op)
         }
     }
@@ -47,23 +56,20 @@ class ParseOperation: Operation {
     }
 
     override func main() {
-        print("start parsing")
-        let lines = string.split(separator: "\n").map { String($0) }
+        let pattern = "(\(mask))\n"
         
-        guard let regular = try? NSRegularExpression(pattern: mask, options: []) else {
+        guard let regular = try? NSRegularExpression(pattern: pattern, options: []) else {
             return
         }
         
         var results: [String] = []
-        for line in lines {
-            let range = NSRange(location: 0, length: line.count)
-            guard regular.firstMatch(in: line, options: [], range: range) != nil
-                else { continue }
-            
-            results.append(line)
+        let matches = regular.matches(in: string, options: [], range: NSRange(location: 0, length: string.count))
+        for match in matches {
+            guard let range = Range(match.range, in: string) else {
+                continue
+            }
+            results.append(String(string[range]))
         }
-        
         closure(results)
-        print("calculated")
     }
 }
