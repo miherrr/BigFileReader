@@ -20,7 +20,12 @@ class ListTableViewController: UITableViewController {
     private var chunkCounter: Int = 0
     private var data = WriteLockableSynchronizedArray<String>(with: [])
     private var dataSource: [String] {
-        return Array(data[0...(pageSize * pageNumber)])
+        let maxIndex = min(pageSize * pageNumber, data.count) - 1
+        if !data.isEmpty {
+            return Array(data[0...maxIndex])
+        } else {
+            return []
+        }
     }
     private var updateQueue: OperationQueue!
 
@@ -79,17 +84,7 @@ class ListTableViewController: UITableViewController {
         
         let newIndexPaths = (currentRowsCount..<newRowsCount).map { IndexPath(row: $0, section: 0) }
         
-        if #available(iOS 11.0, *) {
-            self.tableView.performBatchUpdates({
-                self.tableView.insertRows(at: newIndexPaths, with: .automatic)
-            }, completion: nil)
-        } else {
-            self.tableView.beginUpdates()
-            
-            self.tableView.insertRows(at: newIndexPaths, with: .automatic)
-            
-            self.tableView.endUpdates()
-        }
+        self.tableView.insertNewRows(at: newIndexPaths)
     }
 }
 
@@ -113,21 +108,27 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
                 
                 if self.tableView.numberOfRows(inSection: 0) == 0 && !self.data.isEmpty {
                     self.pageNumber = 1
-                    let indexPaths = (0...self.dataSource.count - 1).map { IndexPath(row: $0, section: 0) }
+                    let indexPaths = (0..<self.dataSource.count).map { IndexPath(row: $0, section: 0) }
                     
-                    if #available(iOS 11.0, *) {
-                        self.tableView.performBatchUpdates({
-                            self.tableView.insertRows(at: indexPaths, with: .automatic)
-                        }, completion: nil)
-                    } else {
-                        self.tableView.beginUpdates()
-                        
-                        self.tableView.insertRows(at: indexPaths, with: .automatic)
-                        
-                        self.tableView.endUpdates()
-                    }
+                    self.tableView.insertNewRows(at: indexPaths)
                 }
             }
+        }
+    }
+}
+
+extension UITableView {
+    func insertNewRows(at indexPaths: [IndexPath]) {
+        if #available(iOS 11.0, *) {
+            self.performBatchUpdates({
+                self.insertRows(at: indexPaths, with: .automatic)
+            }, completion: nil)
+        } else {
+            self.beginUpdates()
+            
+            self.insertRows(at: indexPaths, with: .automatic)
+            
+            self.endUpdates()
         }
     }
 }
