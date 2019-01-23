@@ -10,14 +10,17 @@ import UIKit
 
 class ListTableViewController: UITableViewController {
     
-    // MARK: - Public props
-    var url: URL!
-    var mask: String!
+    // MARK: - Constants
     private let pageSize = 100
-    private var pageNumber = 0
+    private let pagePreloadOffset = 20
     
     // MARK: - Private props
+
     private var chunkCounter: Int = 0
+    private var updateQueue: OperationQueue!
+    private var pageNumber = 0
+    private var url: URL!
+    private var mask: String!
     private var data = WriteLockableSynchronizedArray<String>(with: [])
     private var dataSource: [String] {
         let maxIndex = min(pageSize * pageNumber, data.count) - 1
@@ -27,9 +30,9 @@ class ListTableViewController: UITableViewController {
             return []
         }
     }
-    private var updateQueue: OperationQueue!
 
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -41,8 +44,15 @@ class ListTableViewController: UITableViewController {
         let connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
         connection?.start()
     }
+    
+    // MARK: - Public interface
+    
+    func setInitialParams(mask: String, url: URL) {
+        self.mask = mask
+        self.url = url
+    }
 
-    // TableView
+    // MARK: - TableView
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
@@ -57,7 +67,7 @@ class ListTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if rowsLeftToEnd(for: indexPath) <= 20 {
+        if rowsLeftToEnd(for: indexPath) <= pagePreloadOffset {
             pageNumber += 1
             DispatchQueue.main.async { [weak self] in
                 self?.insertNewRows()
@@ -65,6 +75,8 @@ class ListTableViewController: UITableViewController {
         }
     }
     
+    // MARK: - Private interface
+
     private func rowsLeftToEnd(for indexPath: IndexPath) -> Int {
         var rowsCount = 0
         for section in indexPath.section..<tableView.numberOfSections {
@@ -84,7 +96,7 @@ class ListTableViewController: UITableViewController {
         
         let newIndexPaths = (currentRowsCount..<newRowsCount).map { IndexPath(row: $0, section: 0) }
         
-        self.tableView.insertNewRows(at: newIndexPaths)
+        self.tableView.insertRows(at: newIndexPaths)
     }
 }
 
@@ -110,7 +122,7 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
                     self.pageNumber = 1
                     let indexPaths = (0..<self.dataSource.count).map { IndexPath(row: $0, section: 0) }
                     
-                    self.tableView.insertNewRows(at: indexPaths)
+                    self.tableView.insertRows(at: indexPaths)
                 }
             }
         }
@@ -118,7 +130,7 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
 }
 
 extension UITableView {
-    func insertNewRows(at indexPaths: [IndexPath]) {
+    func insertRows(at indexPaths: [IndexPath]) {
         if #available(iOS 11.0, *) {
             self.performBatchUpdates({
                 self.insertRows(at: indexPaths, with: .automatic)

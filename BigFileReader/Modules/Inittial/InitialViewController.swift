@@ -52,13 +52,12 @@ class InitialViewController: UIViewController {
             return
         }
         
-        vc.mask = maskParsed
         guard let urlString = urlTextField.text,
             let url = URL(string: urlString) else {
                 alert(message: "url невалидный")
                 return
         }
-        vc.url = url
+        vc.setInitialParams(mask: maskParsed, url: url)
     }
     
     private func alert(message: String) {
