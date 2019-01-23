@@ -13,8 +13,9 @@
 		749C870621F6381A0038656E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 749C870521F6381A0038656E /* Assets.xcassets */; };
 		749C870921F6381A0038656E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 749C870721F6381A0038656E /* LaunchScreen.storyboard */; };
 		749C871421F63BA00038656E /* ListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749C871321F63BA00038656E /* ListTableViewController.swift */; };
-		749C871721F63BD30038656E /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749C871621F63BD30038656E /* StreamReader.swift */; };
-		749C871921F645920038656E /* LineReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749C871821F645920038656E /* LineReader.swift */; };
+		C631820321F6EFE700989EE8 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C631820221F6EFE600989EE8 /* Parser.swift */; };
+		C631820521F708FF00989EE8 /* WriteLockableSynchronizedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = C631820421F708FF00989EE8 /* WriteLockableSynchronizedArray.swift */; };
+		C631820721F8609700989EE8 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = C631820621F8609700989EE8 /* Logger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,8 +27,9 @@
 		749C870821F6381A0038656E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		749C870A21F6381A0038656E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		749C871321F63BA00038656E /* ListTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTableViewController.swift; sourceTree = "<group>"; };
-		749C871621F63BD30038656E /* StreamReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
-		749C871821F645920038656E /* LineReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineReader.swift; sourceTree = "<group>"; };
+		C631820221F6EFE600989EE8 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		C631820421F708FF00989EE8 /* WriteLockableSynchronizedArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteLockableSynchronizedArray.swift; sourceTree = "<group>"; };
+		C631820621F8609700989EE8 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,8 +101,9 @@
 		749C871521F63BBB0038656E /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				749C871621F63BD30038656E /* StreamReader.swift */,
-				749C871821F645920038656E /* LineReader.swift */,
+				C631820221F6EFE600989EE8 /* Parser.swift */,
+				C631820421F708FF00989EE8 /* WriteLockableSynchronizedArray.swift */,
+				C631820621F8609700989EE8 /* Logger.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -176,11 +179,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				749C871921F645920038656E /* LineReader.swift in Sources */,
-				749C871721F63BD30038656E /* StreamReader.swift in Sources */,
 				749C871421F63BA00038656E /* ListTableViewController.swift in Sources */,
+				C631820721F8609700989EE8 /* Logger.swift in Sources */,
+				C631820321F6EFE700989EE8 /* Parser.swift in Sources */,
 				749C870121F638190038656E /* InitialViewController.swift in Sources */,
 				749C86FF21F638190038656E /* AppDelegate.swift in Sources */,
+				C631820521F708FF00989EE8 /* WriteLockableSynchronizedArray.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,6 +333,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8VAAW4MW9B;
 				INFOPLIST_FILE = BigFileReader/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -347,6 +352,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8VAAW4MW9B;
 				INFOPLIST_FILE = BigFileReader/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
