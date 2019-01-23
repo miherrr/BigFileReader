@@ -79,17 +79,7 @@ class ListTableViewController: UITableViewController {
         
         let newIndexPaths = (currentRowsCount..<newRowsCount).map { IndexPath(row: $0, section: 0) }
         
-        if #available(iOS 11.0, *) {
-            self.tableView.performBatchUpdates({
-                self.tableView.insertRows(at: newIndexPaths, with: .automatic)
-            }, completion: nil)
-        } else {
-            self.tableView.beginUpdates()
-            
-            self.tableView.insertRows(at: newIndexPaths, with: .automatic)
-            
-            self.tableView.endUpdates()
-        }
+        self.tableView.insertNewRows(at: newIndexPaths)
     }
 }
 
@@ -115,19 +105,25 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
                     self.pageNumber = 1
                     let indexPaths = (0...self.dataSource.count - 1).map { IndexPath(row: $0, section: 0) }
                     
-                    if #available(iOS 11.0, *) {
-                        self.tableView.performBatchUpdates({
-                            self.tableView.insertRows(at: indexPaths, with: .automatic)
-                        }, completion: nil)
-                    } else {
-                        self.tableView.beginUpdates()
-                        
-                        self.tableView.insertRows(at: indexPaths, with: .automatic)
-                        
-                        self.tableView.endUpdates()
-                    }
+                    self.tableView.insertNewRows(at: indexPaths)
                 }
             }
+        }
+    }
+}
+
+extension UITableView {
+    func insertNewRows(at indexPaths: [IndexPath]) {
+        if #available(iOS 11.0, *) {
+            self.performBatchUpdates({
+                self.insertRows(at: indexPaths, with: .automatic)
+            }, completion: nil)
+        } else {
+            self.beginUpdates()
+            
+            self.insertRows(at: indexPaths, with: .automatic)
+            
+            self.endUpdates()
         }
     }
 }
