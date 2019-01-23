@@ -13,13 +13,18 @@ class Parser {
     
     
     private var buffer: String?
-    private let operations: OperationQueue
+    private let parseOperations: OperationQueue
+    private let logOperations: OperationQueue
     var mask: String = ".*"
     
     private init() {
-        operations = OperationQueue()
-        operations.qualityOfService = QualityOfService.background
-        operations.maxConcurrentOperationCount = 1
+        parseOperations = OperationQueue()
+        parseOperations.qualityOfService = QualityOfService.background
+        parseOperations.maxConcurrentOperationCount = 1
+        
+        logOperations = OperationQueue()
+        logOperations.qualityOfService = QualityOfService.background
+        logOperations.maxConcurrentOperationCount = 1
     }
     
     func parseNextChunk(_ string: String, result: @escaping (([String]) -> Void)) {
@@ -34,20 +39,23 @@ class Parser {
             self.buffer = String(tail)
 
             let op = ParseOperation(stringToParse, mask: self.mask, closure: result)
-            self.operations.addOperation(op)
+            self.parseOperations.addOperation(op)
+            op.completionBlock = {
+                self.logOperations.addOperation(LogOperation(op.results))
+            }
         }
     }
     
     
 }
 
-class ParseOperation: Operation {
+private class ParseOperation: Operation {
 
     private let string: String
     private let mask: String
     private let closure: (([String]) -> Void)
     
-    var result: [String] = []
+    var results: [String] = []
 
     init(_ string: String, mask: String, closure: @escaping (([String]) -> Void)) {
         self.string = string
@@ -64,7 +72,7 @@ class ParseOperation: Operation {
         }
         
         let matches = regular.matches(in: string, options: [], range: NSRange(location: 0, length: string.count))
-        let results = matches.compactMap { match -> String? in
+        results = matches.compactMap { match -> String? in
             guard let range = Range(match.range, in: string) else {
                 return nil
             }
@@ -74,5 +82,17 @@ class ParseOperation: Operation {
         let diff = CFAbsoluteTimeGetCurrent() - start
         print("Took \(diff) seconds")
         closure(results)
+    }
+}
+
+private class LogOperation: Operation {
+    private let items: [String]
+    
+    init(_ items: [String]) {
+        self.items = items
+    }
+    
+    override func main() {
+        Logger.shared.log(items)
     }
 }
