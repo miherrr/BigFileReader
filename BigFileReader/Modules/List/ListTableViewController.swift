@@ -20,7 +20,12 @@ class ListTableViewController: UITableViewController {
     private var chunkCounter: Int = 0
     private var data = WriteLockableSynchronizedArray<String>(with: [])
     private var dataSource: [String] {
-        return Array(data[0...(pageSize * pageNumber)])
+        let maxIndex = min(pageSize * pageNumber, data.count) - 1
+        if !data.isEmpty {
+            return Array(data[0...maxIndex])
+        } else {
+            return []
+        }
     }
     private var updateQueue: OperationQueue!
 
@@ -103,7 +108,7 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
                 
                 if self.tableView.numberOfRows(inSection: 0) == 0 && !self.data.isEmpty {
                     self.pageNumber = 1
-                    let indexPaths = (0...self.dataSource.count - 1).map { IndexPath(row: $0, section: 0) }
+                    let indexPaths = (0..<self.dataSource.count).map { IndexPath(row: $0, section: 0) }
                     
                     self.tableView.insertNewRows(at: indexPaths)
                 }
