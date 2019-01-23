@@ -10,13 +10,20 @@ import UIKit
 
 class InitialViewController: UIViewController {
 
-    @IBOutlet weak var urlTextField: UITextField!
-    @IBOutlet weak var maskTextField: UITextField!
+    @IBOutlet private weak var urlTextField: UITextField!
+    @IBOutlet private weak var maskTextField: UITextField!
+    
+    private var maskParsed: String {
+        guard let text = maskTextField.text else {
+            return ""
+        }
+        return "^(\(text))$".replacingOccurrences(of: "*", with: ".*").replacingOccurrences(of: "?", with: ".?")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        maskTextField.text = ".*"
+        maskTextField.text = "*"
         urlTextField.text = "https://joker-prognoz.ru/test2.txt"
     }
     
@@ -25,7 +32,7 @@ class InitialViewController: UIViewController {
             return
         }
         
-        vc.mask = maskTextField.text
+        vc.mask = maskParsed
         guard let urlString = urlTextField.text,
             let url = URL(string: urlString) else {
                 return
