@@ -18,7 +18,7 @@ class ListTableViewController: UITableViewController {
 
     private var chunkCounter: Int = 0
     private var updateQueue: OperationQueue!
-    private var pageNumber = 0
+    private var pageNumber = 1
     private var url: URL!
     private var mask: String!
     private var data = WriteLockableSynchronizedArray<String>(with: [])
@@ -117,13 +117,7 @@ extension ListTableViewController: NSURLConnectionDataDelegate {
             self.data.append(results)
 
             DispatchQueue.main.async {
-                
-                if self.tableView.numberOfRows(inSection: 0) == 0 && !self.data.isEmpty {
-                    self.pageNumber = 1
-                    let indexPaths = (0..<self.dataSource.count).map { IndexPath(row: $0, section: 0) }
-                    
-                    self.tableView.insertRows(at: indexPaths)
-                }
+                self.insertNewRows()
             }
         }
     }
